@@ -1,8 +1,0 @@
-# Navigate to the project
-cd ~/Documents/college/siot_face_detection
-
-# Activate virtual environment
-source venv/bin/activate
-
-# Run the app
-python app.py

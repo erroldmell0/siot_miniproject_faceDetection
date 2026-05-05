@@ -10,12 +10,12 @@
     --text-dim: #94a3b8;
     --text-muted: #64748b;
     --primary: #3b82f6;
-    --primary-glow: rgba(59,130,246,.35);
+    --primary-glow: rgba(59,130,246,.15);
     --accent: #06b6d4;
     --success: #22c55e;
     --danger: #ef4444;
     --warning: #f59e0b;
-    --gradient: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+    --gradient: linear-gradient(135deg, #2563eb, #4f46e5);
     --radius: 12px;
     --radius-sm: 8px;
     --shadow: 0 4px 24px rgba(0,0,0,.4);
@@ -84,7 +84,7 @@ small { color: var(--text-muted); font-size: .8em; }
 /* ===== Hero ===== */
 .hero { position: relative; min-height: calc(100vh - 80px); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 2rem; }
 .hero-bg-orbs { position: absolute; inset: 0; pointer-events: none; }
-.orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .3; }
+.orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .15; }
 .orb-1 { width: 400px; height: 400px; background: #3b82f6; top: 10%; left: 5%; animation: float 8s ease-in-out infinite; }
 .orb-2 { width: 300px; height: 300px; background: #8b5cf6; top: 50%; right: 10%; animation: float 10s ease-in-out infinite reverse; }
 .orb-3 { width: 250px; height: 250px; background: #06b6d4; bottom: 10%; left: 30%; animation: float 12s ease-in-out infinite; }
@@ -180,7 +180,7 @@ small { color: var(--text-muted); font-size: .8em; }
 .vault-header h1 { font-size: 1.8rem; }
 .vault-sub { color: var(--text-dim); font-size: .9rem; margin-top: .25rem; }
 .files-count { color: var(--text-muted); font-size: .85rem; margin-bottom: 1rem; }
-.files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+.files-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(450px, 1fr)); gap: 1rem; }
 .file-card { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); transition: var(--transition); }
 .file-card:hover { border-color: var(--primary); background: var(--bg-card-hover); }
 .file-icon { font-size: 2rem; }
