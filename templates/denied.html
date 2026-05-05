@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Access Denied — SecureVault{% endblock %}
+
+{% block content %}
+<section class="denied-section">
+    <div class="denied-container">
+        <div class="denied-icon">ACCESS DENIED</div>
+        <h1>Access Denied</h1>
+        <p>Your face was not recognised by the system. You are not authorised to access the vault.</p>
+        <div class="denied-actions">
+            <a href="{{ url_for('login') }}" class="btn btn-primary">Try Again</a>
+            <a href="{{ url_for('register') }}" class="btn btn-outline">Register Your Face</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

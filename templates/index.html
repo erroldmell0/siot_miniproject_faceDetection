@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}SecureVault — Biometric Document Protection{% endblock %}
+
+{% block content %}
+<section class="hero" id="hero-section">
+    <div class="hero-bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+    <div class="hero-content">
+        <div class="hero-badge">Biometric Security</div>
+        <h1 class="hero-title">Your Documents.<br><span class="gradient-text">Your Face is the Key.</span></h1>
+        <p class="hero-subtitle">SecureVault uses real-time facial recognition to protect your confidential documents. No passwords to remember — just you.</p>
+        <div class="hero-actions">
+            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg" id="hero-register-btn">Register Your Face</a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg" id="hero-login-btn">Access Vault →</a>
+        </div>
+        <div class="hero-stats">
+            <div class="stat-item"><span class="stat-number">128</span><span class="stat-label">Encoding Points</span></div>
+            <div class="stat-item"><span class="stat-number">99.7%</span><span class="stat-label">Accuracy</span></div>
+            <div class="stat-item"><span class="stat-number">&lt;2s</span><span class="stat-label">Auth Speed</span></div>
+        </div>
+    </div>
+</section>
+
+<section class="features" id="features-section">
+    <div class="section-container">
+        <h2 class="section-title">How It Works</h2>
+        <div class="features-grid">
+            <div class="feature-card" id="feature-register">
+                <div class="feature-icon">01</div>
+                <div class="feature-step">Step 1</div>
+                <h3>Register Your Face</h3>
+                <p>Capture your face via webcam. The system generates a unique 128-point facial encoding as your biometric key.</p>
+            </div>
+            <div class="feature-card" id="feature-authenticate">
+                <div class="feature-icon">02</div>
+                <div class="feature-step">Step 2</div>
+                <h3>Authenticate</h3>
+                <p>Look into the camera to log in. Your face is compared against registered encodings using distance-based matching.</p>
+            </div>
+            <div class="feature-card" id="feature-access">
+                <div class="feature-icon">03</div>
+                <div class="feature-step">Step 3</div>
+                <h3>Access Your Vault</h3>
+                <p>Upload, view, and manage your confidential documents. Each user has an isolated, secure file space.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="tech-section" id="tech-section">
+    <div class="section-container">
+        <h2 class="section-title">Technology Stack</h2>
+        <div class="tech-grid">
+            <div class="tech-item"><div class="tech-badge">Backend</div><h4>Flask</h4><p>Python micro-framework</p></div>
+            <div class="tech-item"><div class="tech-badge">AI/ML</div><h4>face_recognition</h4><p>dlib-based encoding</p></div>
+            <div class="tech-item"><div class="tech-badge">Vision</div><h4>OpenCV</h4><p>Image processing</p></div>
+            <div class="tech-item"><div class="tech-badge">Frontend</div><h4>Vanilla JS</h4><p>WebRTC camera</p></div>
+        </div>
+    </div>
+</section>
+{% endblock %}

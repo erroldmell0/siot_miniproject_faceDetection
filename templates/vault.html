@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Vault — SecureVault{% endblock %}
+
+{% block content %}
+<section class="vault-section">
+    <div class="vault-header">
+        <div class="vault-welcome">
+            <h1>Welcome, {{ full_name }}</h1>
+            <p class="vault-sub">Your secure document vault • <code>@{{ username }}</code></p>
+        </div>
+        <div class="vault-actions-top">
+            <button id="upload-trigger-btn" class="btn btn-primary" onclick="document.getElementById('upload-modal').classList.add('active')">
+                ⬆️ Upload File
+            </button>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Upload Document</h2>
+                <button class="modal-close" onclick="document.getElementById('upload-modal').classList.remove('active')">✕</button>
+            </div>
+            <form id="upload-form" enctype="multipart/form-data">
+                <div class="upload-zone" id="upload-zone">
+                    <span class="upload-zone-icon">+</span>
+                    <p>Drag & drop your file here</p>
+                    <p class="upload-zone-sub">or click to browse</p>
+                    <input type="file" id="file-input" name="file" class="file-input-hidden">
+                    <small>Allowed: {{ allowed_extensions }} • Max 16 MB</small>
+                </div>
+                <div id="upload-progress" class="upload-progress" style="display:none;">
+                    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                    <span id="upload-status">Uploading...</span>
+                </div>
+                <button type="submit" id="upload-submit" class="btn btn-primary btn-block" disabled>Upload</button>
+            </form>
+            <div id="upload-result" class="result-message" style="display:none;"></div>
+        </div>
+    </div>
+
+    <!-- Files Grid -->
+    <div class="files-section">
+        {% if files %}
+        <div class="files-count">{{ files|length }} file{{ 's' if files|length != 1 }} in your vault</div>
+        <div class="files-grid">
+            {% for file in files %}
+            <div class="file-card" id="file-{{ loop.index }}">
+                <div class="file-icon">{{ {'pdf':'📕','png':'🖼️','jpg':'🖼️','jpeg':'🖼️','txt':'📝','docx':'📄','xlsx':'📊','csv':'📊','md':'📝'}.get(file.extension, '📁') }}</div>
+                <div class="file-info">
+                    <h4 class="file-name" title="{{ file.name }}">{{ file.name }}</h4>
+                    <span class="file-meta">{{ file.size }} KB • {{ file.uploaded_at }}</span>
+                </div>
+                <div class="file-actions">
+                    <a href="/api/download/{{ file.name }}" class="btn btn-sm btn-secondary" title="Download">⬇️</a>
+                    <button class="btn btn-sm btn-danger" onclick="deleteFile('{{ file.name }}')" title="Delete">🗑️</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">—</div>
+            <h3>Your vault is empty</h3>
+            <p>Upload your first document to get started</p>
+            <button class="btn btn-primary" onclick="document.getElementById('upload-modal').classList.add('active')">Upload File</button>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const uploadZone = document.getElementById('upload-zone');
+    const fileInput = document.getElementById('file-input');
+    const uploadSubmit = document.getElementById('upload-submit');
+    const uploadForm = document.getElementById('upload-form');
+    const uploadResult = document.getElementById('upload-result');
+    const uploadProgress = document.getElementById('upload-progress');
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+    uploadZone.addEventListener('dragover', (e) => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
+    });
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            uploadZone.querySelector('p').textContent = fileInput.files[0].name;
+            uploadSubmit.disabled = false;
+        }
+    });
+
+    uploadForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!fileInput.files.length) return;
+        uploadSubmit.disabled = true;
+        uploadProgress.style.display = 'block';
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        try {
+            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            uploadResult.style.display = 'block';
+            uploadResult.className = 'result-message ' + (data.success ? 'result-success' : 'result-error');
+            uploadResult.textContent = data.message;
+            if (data.success) setTimeout(() => location.reload(), 1500);
+        } catch (err) {
+            uploadResult.style.display = 'block';
+            uploadResult.className = 'result-message result-error';
+            uploadResult.textContent = 'Upload failed.';
+        }
+        uploadProgress.style.display = 'none';
+        uploadSubmit.disabled = false;
+    });
+});
+
+async function deleteFile(filename) {
+    if (!confirm(`Delete "${filename}"?`)) return;
+    try {
+        const res = await fetch('/api/delete-file', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ filename })
+        });
+        const data = await res.json();
+        if (data.success) location.reload();
+        else alert(data.message);
+    } catch (err) { alert('Failed to delete file.'); }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SecureVault — A face-recognition protected document vault. Biometric authentication for secure file access.">
+    <title>{% block title %}SecureVault{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="main-nav">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-logo">
+                <span class="logo-icon">SV</span>
+                <span class="logo-text">Secure<span class="logo-accent">Vault</span></span>
+            </a>
+            <div class="nav-links">
+                {% if session.get('authenticated') %}
+                    <a href="{{ url_for('vault') }}" class="nav-link {% if request.endpoint == 'vault' %}active{% endif %}">
+                        Vault
+                    </a>
+                    <a href="{{ url_for('view_access_logs') }}" class="nav-link {% if request.endpoint == 'view_access_logs' %}active{% endif %}">
+                        Logs
+                    </a>
+                    <div class="nav-user">
+                        <span class="user-badge">{{ session.get('full_name', 'User') }}</span>
+                        <a href="{{ url_for('logout') }}" class="nav-link logout-link">Logout</a>
+                    </div>
+                {% else %}
+                    <a href="{{ url_for('register') }}" class="nav-link {% if request.endpoint == 'register' %}active{% endif %}">Register</a>
+                    <a href="{{ url_for('login') }}" class="btn-nav" id="nav-login-btn">Login with Face</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+            <span>{{ message }}</span>
+            <button class="flash-close" onclick="this.parentElement.remove()">✕</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2026 SecureVault — Face Recognition Access Control System</p>
+            <p class="footer-sub">Built with Flask &amp; face_recognition | Course Project</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

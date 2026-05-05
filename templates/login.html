@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Login — SecureVault{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="lock-icon-large"></div>
+            <h1>Face Authentication</h1>
+            <p>Look into the camera to verify your identity</p>
+        </div>
+
+        <div class="camera-section">
+            <div class="camera-container" id="camera-container">
+                <video id="camera-feed" autoplay playsinline></video>
+                <canvas id="camera-canvas" style="display:none;"></canvas>
+                <div class="camera-overlay scanning" id="camera-overlay" style="display:none;">
+                    <div class="face-guide"></div>
+                    <div class="scan-line"></div>
+                    <span>Position your face within the frame</span>
+                </div>
+                <div class="camera-placeholder" id="camera-placeholder">
+                    <span class="placeholder-icon">CAM</span>
+                    <span>Click below to start camera</span>
+                </div>
+            </div>
+            <div class="camera-controls">
+                <button type="button" id="start-camera-btn" class="btn btn-secondary">Start Camera</button>
+                <button type="button" id="authenticate-btn" class="btn btn-primary btn-lg" disabled>
+                    Authenticate
+                </button>
+            </div>
+        </div>
+
+        <div id="auth-result" class="auth-result" style="display:none;">
+            <div id="auth-icon" class="auth-result-icon"></div>
+            <h2 id="auth-title"></h2>
+            <p id="auth-message"></p>
+            <div id="auth-confidence" class="confidence-bar-container" style="display:none;">
+                <span class="confidence-label">Match Confidence</span>
+                <div class="confidence-bar"><div class="confidence-fill" id="confidence-fill"></div></div>
+                <span class="confidence-value" id="confidence-value"></span>
+            </div>
+            <div id="auth-actions" class="auth-result-actions"></div>
+        </div>
+
+        <div class="auth-footer">
+            <p>Not registered? <a href="{{ url_for('register') }}">Register your face first</a></p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const cam = new CameraHandler('camera-feed', 'camera-canvas');
+    const startBtn = document.getElementById('start-camera-btn');
+    const authBtn = document.getElementById('authenticate-btn');
+    const placeholder = document.getElementById('camera-placeholder');
+    const overlay = document.getElementById('camera-overlay');
+    const authResult = document.getElementById('auth-result');
+    const authIcon = document.getElementById('auth-icon');
+    const authTitle = document.getElementById('auth-title');
+    const authMessage = document.getElementById('auth-message');
+    const authConfidence = document.getElementById('auth-confidence');
+    const confidenceFill = document.getElementById('confidence-fill');
+    const confidenceValue = document.getElementById('confidence-value');
+    const authActions = document.getElementById('auth-actions');
+
+    startBtn.addEventListener('click', async () => {
+        const ok = await cam.start();
+        if (ok) {
+            startBtn.style.display = 'none';
+            authBtn.disabled = false;
+            placeholder.style.display = 'none';
+            overlay.style.display = 'flex';
+            authResult.style.display = 'none';
+        }
+    });
+
+    authBtn.addEventListener('click', async () => {
+        authBtn.disabled = true;
+        authBtn.textContent = 'Scanning...';
+        overlay.classList.add('active-scan');
+
+        const imageData = cam.capture();
+        if (!imageData) {
+            authBtn.disabled = false;
+            authBtn.textContent = 'Authenticate';
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/authenticate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ image: imageData })
+            });
+            const data = await res.json();
+            cam.stop();
+            overlay.style.display = 'none';
+            showAuthResult(data);
+        } catch (err) {
+            showAuthResult({authenticated: false, message: 'Network error.', confidence: 0});
+        } finally {
+            authBtn.disabled = false;
+            authBtn.textContent = 'Authenticate';
+            overlay.classList.remove('active-scan');
+        }
+    });
+
+    function showAuthResult(data) {
+        authResult.style.display = 'block';
+        authResult.className = 'auth-result ' + (data.authenticated ? 'auth-granted' : 'auth-denied');
+        authIcon.textContent = data.authenticated ? 'GRANTED' : 'DENIED';
+        authTitle.textContent = data.authenticated ? 'Access Granted' : 'Access Denied';
+        authMessage.textContent = data.message;
+
+        if (data.confidence > 0) {
+            authConfidence.style.display = 'block';
+            const pct = Math.min(data.confidence, 100);
+            confidenceFill.style.width = pct + '%';
+            confidenceFill.className = 'confidence-fill ' + (data.authenticated ? 'fill-success' : 'fill-danger');
+            confidenceValue.textContent = pct + '%';
+        }
+
+        authActions.innerHTML = '';
+        if (data.authenticated) {
+            const a = document.createElement('a');
+            a.href = '/vault';
+            a.className = 'btn btn-primary';
+            a.textContent = 'Enter Vault';
+            authActions.appendChild(a);
+        } else {
+            const retry = document.createElement('button');
+            retry.className = 'btn btn-secondary';
+            retry.textContent = 'Try Again';
+            retry.onclick = async () => {
+                authResult.style.display = 'none';
+                placeholder.style.display = 'none';
+                overlay.style.display = 'flex';
+                startBtn.style.display = 'none';
+                authBtn.disabled = false;
+                await cam.start();
+            };
+            authActions.appendChild(retry);
+
+            const reg = document.createElement('a');
+            reg.href = '/register';
+            reg.className = 'btn btn-outline';
+            reg.textContent = 'Register Instead';
+            authActions.appendChild(reg);
+        }
+    }
+});
+</script>
+{% endblock %}

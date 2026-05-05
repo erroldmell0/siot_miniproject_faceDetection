@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Access Logs — SecureVault{% endblock %}
+
+{% block content %}
+<section class="logs-section">
+    <div class="section-container">
+        <div class="logs-header">
+            <h1>Access Logs</h1>
+            <p>Authentication attempts for this session</p>
+        </div>
+
+        {% if logs %}
+        <div class="logs-table-wrapper">
+            <table class="logs-table" id="logs-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Status</th>
+                        <th>Confidence</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr class="{{ 'log-success' if log.success else 'log-fail' }}">
+                        <td>{{ log.timestamp[:19] }}</td>
+                        <td>
+                            <span class="log-user">{{ log.full_name }}</span>
+                            <span class="log-username">@{{ log.username }}</span>
+                        </td>
+                        <td>
+                            <span class="status-badge {{ 'badge-success' if log.success else 'badge-danger' }}">
+                                {{ 'Granted' if log.success else 'Denied' }}
+                            </span>
+                        </td>
+                        <td>{{ log.confidence }}%</td>
+                        <td><code>{{ log.ip_address }}</code></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">—</div>
+            <h3>No access logs yet</h3>
+            <p>Authentication attempts will appear here</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
